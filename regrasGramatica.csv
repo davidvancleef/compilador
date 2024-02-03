@@ -30,7 +30,7 @@ CP,"ES,CP"
 CP,"CMD,CP"
 CP,"COND,CP"
 CP,fimse
-A,RA
+A,"R,A"
 R,"CABR,CPR"
 CABR,"repita,ab_p,EXP_R,fc_p"
 CPR,"ES,CPR"

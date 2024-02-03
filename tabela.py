@@ -1,7 +1,7 @@
 from tokenn import token
 
 class tabela:
-    def __init__(self):
+    def __init__(self) -> None:
         self.tabela = []
         self.insercaoInicial("inicio")
         self.insercaoInicial("varinicio")
@@ -30,6 +30,14 @@ class tabela:
                 return tokenRegistrado
         return False
     
+    def atualizar(self, lexema, tipo):
+        for i,tk in enumerate(self.tabela):
+            if tk.lexema == lexema:
+                token_aux = token(tk.classe,lexema,tipo)
+                self.tabela.pop(i)
+                self.tabela.insert(i,token_aux)
+                break
+
     def printarTabelaAtualizada(self):
         print('\n---TABELA DE SIMBOLOS---')
         for simbolo in self.tabela:

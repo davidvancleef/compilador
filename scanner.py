@@ -8,7 +8,7 @@ def retornaTabela():
 
 def erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro):
     lexema = "".join(palavra)
-    tokenErro = token('ERROR','NULO','NULO')
+    tokenErro = token('ERROR',lexema,'NULO')
     print(f'Classe: {tokenErro.classe}, Lexema: {tokenErro.lexema}, Tipo: {tokenErro.tipo}')
     if estado == 3:
         print(f'ERRO LÉXICO: O numero "{lexema}" necessita de um digito após o ponto decimal. linha: {linha + 1}, coluna: {coluna}')
@@ -20,8 +20,6 @@ def erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro):
         print(f'ERRO LÉXICO: Para o caso de {lexema} é necessário um fecha aspas na linha: {linhaComErro + 1}, coluna: {colunaComErro}')
     else:
         print(f'ERRO LÉXICO: O lexema "{lexema}" é inválido na linguagem dada, linha: {linha + 1}, coluna: {coluna}')
-    
-    return [tokenErro,linha,coluna]
 
 
 def aceita(linha,coluna,estado,palavra):
@@ -139,8 +137,8 @@ def scanner(arquivo,linha,coluna):
             else:
                 estado = 0
                 palavra.append(caractereLido)
-                coluna = coluna + 1
-                return erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                palavra.clear()
         
         elif estado == 1:
             if caractereLido in digitos:
@@ -170,7 +168,10 @@ def scanner(arquivo,linha,coluna):
                 estado = 4
                 palavra.append(caractereLido)               
             else:
-                return erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                estado = 0
+                palavra.append(caractereLido)
+                erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                palavra.clear()
         
         elif estado == 4:
             if caractereLido in digitos:
@@ -190,14 +191,20 @@ def scanner(arquivo,linha,coluna):
                 estado = 6
                 palavra.append(caractereLido)
             else:
-                return erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                estado = 0
+                palavra.append(caractereLido)
+                erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                palavra.clear()
 
         elif estado == 6:       
             if caractereLido in digitos:
                 palavra.append(caractereLido)
                 estado = 7
             else:
-                return erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                estado = 0
+                palavra.append(caractereLido)
+                erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                palavra.clear()
         
         elif estado == 7:       
             if caractereLido in digitos:
@@ -213,7 +220,10 @@ def scanner(arquivo,linha,coluna):
             elif caractereLido != '\n':
                 palavra.append(caractereLido)
             else:
-                return erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro) 
+                estado = 0
+                palavra.append(caractereLido)
+                erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro)
+                palavra.clear()
         
         elif estado == 9:
             return aceita(linha,coluna,estado,palavra)
@@ -266,6 +276,7 @@ def scanner(arquivo,linha,coluna):
 
         elif estado in [21,22,23,24]:
             return aceita(linha,coluna,estado,palavra)
+        
         coluna = coluna + 1
         caractereLido = arquivo[linha][coluna]
             
