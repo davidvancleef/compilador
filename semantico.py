@@ -1,9 +1,9 @@
 from tabela import tabela
 from tokenn import token
 
-str1 = "#include <stdio.h>\ntypedef char literal[256];\nvoid main(void){\n"
-str2 = "/*-------Variaveis temporarias---------*/\n"
-str3 = ""
+cabecalho = "#include <stdio.h>\ntypedef char literal[256];\nvoid main(void)\n{"
+str1 = "\t/*-------Variaveis temporarias---------*/\n"
+str2 = ""
 straux = ""
 
 
@@ -12,35 +12,36 @@ oprd1 = None
 oprd2 = None
 ld = token(None,None,None)
 expr = token(None,None,None)
-cont = 0
-flag = True
+contadorTemporarias = 0
+corretude = True
+tabulacao = 1
 
-def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
+def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
+    global cabecalho
     global str1
     global str2
-    global str3
     global token_aux
     global oprd1
     global oprd2
     global ld
-    global cont
-    global flag
-    
-    if flag1 == False:
-        flag = flag1
-    
-    if t == 6:
-        str3 = str3 + ";\n"
-    
-    if t == 7:
-        tk = tab.buscaLexema(a[0].lexema)
+    global contadorTemporarias
+    global corretude
+    global tabulacao
+    if corretude1 == False:
+        corretude = corretude1
+
+    if t == 6: #Coloca ; e pula linha depois de receber com sucesso uma declaracao de variavel
         
-        if tk == False:
+        str2 = str2 + ";\n"
+    
+    if t == 7: #No reduce de declaracao de variaveis, Ex: "literal A;"
+        tk = tab.buscaLexema(a[0].lexema) #Token tk procura nome da variavel declarada
+        if tk == False: #Caso nao encontadorTemporariasre, 
             return a[1:]
         
         if tk.tipo == 'NULO':
             tab.atualizar(a[0].lexema,token_aux.tipo)
-            str3 += f",{a[0].lexema}"
+            str2 += f",{a[0].lexema}"
         return a[1:]
         
     if t == 8:
@@ -51,57 +52,67 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
         
         if tk.tipo == 'NULO':
             tab.atualizar(a[0].lexema,token_aux.tipo)
-            str3 += f"{a[0].lexema}"
+            str2 += f"{a[0].lexema}"
             
         else:
             print(f"\nVARIAVEL {tk.lexema} JA DECLARADA ANTERIORMENTE\n")
-            flag = False
+            corretude = False
                 
         return a[1:]
     
     if t == 9:
         token_aux.tipo = "inteiro"
-        str3 += "int "
-    
+        str2 = tabular(str2, tabulacao)
+        str2 += "int " 
+
     if t == 10:
         token_aux.tipo = "real"
-        str3 += "double "
+        str2 = tabular(str2, tabulacao)
+        str2 += "double "
         
     if t == 11:
         token_aux.tipo = "literal"
-        str3 += "literal "
+        str2 = tabular(str2, tabulacao)
+        str2 += "literal "
 
     if t == 13:
         tk = tab.buscaLexema(a[0].lexema)
         if tk == False:
             print(f"\nERRO SEMANTICO - VARIAVEL NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
             return a[1:]
         if tk.tipo == 'NULO':
             print(F"\nERRO SEMANTICO - VARIAVEL '{tk.lexema}' NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
         
         elif tk.tipo == 'inteiro':
-            str3 = str3 + f'scanf("%d", &{a[0].lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'scanf("%d", &{a[0].lexema});\n'
         elif tk.tipo == 'real':
-            str3 = str3 + f'scanf("%lf", &{a[0].lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'scanf("%lf", &{a[0].lexema});\n'
         elif tk.tipo == 'literal':
-            str3 = str3 + f'scanf("%s", &{a[0].lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'scanf("%s", &{a[0].lexema});\n'
         
         return a[1:]
 
     if t == 14:
         if token_aux.classe != 'ID':
-            str3 = str3 + f'printf("{token_aux.lexema}");\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'printf("{token_aux.lexema}");\n'
         
         elif token_aux.tipo == 'inteiro':
-            str3 = str3 + f'printf("%d",{token_aux.lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'printf("%d",{token_aux.lexema});\n'
 
         elif token_aux.tipo == 'real':
-            str3 = str3 + f'printf("%lf",{token_aux.lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'printf("%lf",{token_aux.lexema});\n'
         
         elif token_aux.tipo == 'literal':
-            str3 = str3 + f'printf("%s",{token_aux.lexema});\n'
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f'printf("%s",{token_aux.lexema});\n'
     
         
     if t == 15:
@@ -119,16 +130,14 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
     
     if t == 17:
         tk = tab.buscaLexema(a[0].lexema)
-        
         if tk == False:
-            print(f"\nERRO SEMANTICO - VARIAVEL {a[0].lexema} NÃO DECLARADA LINHA {linha} COLUNA {coluna}\n")
+            print(f"\nERRO SEMANTICO - VARIAVEL {a[0].lexema} NÃO DECLARADA LINHA {linha+1} COLUNA {coluna}\n")
         elif tk.tipo == 'NULO':
-            print(f"\nERRO SEMANTICO - VARIÁVEL '{tk.lexema}' NÃO DECLARADA LINHA {linha} COLUNA {coluna}\n")
-        
+            print(f"\nERRO SEMANTICO - VARIÁVEL '{tk.lexema}' NÃO DECLARADA LINHA {linha+1} COLUNA {coluna}\n")
         else:
-            token_aux = tk
-
-        
+            token_aux.lexema = a[0].lexema
+            token_aux.tipo = a[0].tipo
+            token_aux.classe = a[0].classe
         a.pop(0)
     
     
@@ -136,20 +145,20 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
         tk = tab.buscaLexema(a[0].lexema)
         
         if tk == False:
-            print(f'\nERRO SEMANTICO - VARIAVEL NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n')
-            flag = False
+            print(f"\nERRO SEMANTICO - VARIAVEL NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
+            corretude = False
             a.pop(0)
             return a
         
         elif tk.tipo == ld.tipo:
             
             if tk.tipo == ld.tipo:
-                str3 = str3 + f"{tk.lexema} = {ld.lexema};\n"
+                str2 = tabular(str2, tabulacao)
+                str2 = str2 + f"{tk.lexema} = {ld.lexema};\n"
         
         else:
             print(f"\nERRO SEMANTICO: OPERANDOS {tk.lexema} e {ld.lexema} COM TIPOS INCOMPATIVEIS LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
-            
+            corretude = False
         a.pop(0)
     
     
@@ -158,25 +167,25 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
             
             opm = a[1].lexema
             # linha Tx = oprd1 opm Oprd2
-            str3 = str3 + f"T{cont} = {oprd1.lexema} {opm} {oprd2.lexema};\n"
+            str2 = tabular(str2, tabulacao)
+            str2 = str2 + f"T{contadorTemporarias} = {oprd1.lexema} {opm} {oprd2.lexema};\n"
             
             # verifica se declara a temporária como int ou double
             if opm == '/' or oprd1.tipo == 'real':
                 declaraTemp('double')
-                ld = token(None, f'T{cont}', 'real')
+                ld = token(None, f'T{contadorTemporarias}', 'real')
             else: 
                 declaraTemp('inteiro')
-                ld = token(None, f'T{cont}', 'inteiro')
-        
+                ld = token(None, f'T{contadorTemporarias}', 'inteiro')
         
         else:
             print(f"\nERRO SEMANTICO: OPERANDOS '{oprd1.lexema}' e '{oprd2.lexema}' COM TIPOS INCOMPATIVEIS LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
         
         oprd1 = None
         oprd2 = None
             
-        cont += 1
+        contadorTemporarias += 1
         a.pop(1)
     
         
@@ -203,12 +212,12 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
         tk = tab.buscaLexema(temp.lexema)
         if tk == False:
             print(f"\nERRO SEMANTICO - VARIAVEL NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
             return a
         
         if tk.tipo == 'NULO':
             print(f"\nERRO SEMANTICO - VARIAVEL '{tk.lexema}' NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
             return a
         
         else:
@@ -242,21 +251,27 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
     
       
     if t == 25:
-        str3 += "}\n"
+        str2 = tabular(str2, tabulacao-1)
+        str2 += "}\n"
+        tabulacao = tabulacao - 1
     
     
     if t == 26:
-        str3 += f"if({expr.lexema})\n{{\n "
+        str2 = tabular(str2, tabulacao)
+        str2 += f"if({expr.lexema})\n"
+        str2 = tabular(str2, tabulacao)
+        str2 += f"{{\n"
+        tabulacao = tabulacao + 1
     
-    
-    if t == 27:
-        # verifica se a operação é entre int-int, double-double, double-int
-        if oprd1.tipo in ['inteiro','real'] and oprd2.tipo in ['inteiro', 'real']:
+    if t == 27:       #Cria variavel Tx para receber o valor da operacao sendo realizada
+        # verifica se os tipos sao compativeis
+        if (oprd1.tipo == 'inteiro' or oprd1.tipo == 'real') and (oprd2.tipo == 'inteiro' or oprd2.tipo == 'real'):
             #lexema da expr recebe Tx
-            expr.lexema = f"T{cont}"
+            expr.lexema = f"T{contadorTemporarias}"
             
             #linha Tx = oprd1 opr oprd2
-            str3 += f"T{cont} = {oprd1.lexema} {a[0].lexema} {oprd2.lexema};\n"
+            str2 = tabular(str2, tabulacao)
+            str2 += f"T{contadorTemporarias} = {oprd1.lexema} {a[0].lexema} {oprd2.lexema};\n"
             
             if oprd1.tipo == 'inteiro':
                 declaraTemp('inteiro')
@@ -265,34 +280,55 @@ def semantico(t,a:list,tab: tabela, linha, coluna, flag1):
             
         else:
             print(f"\nERRO SEMANTICO - OPERANDOS COM TIPOS INCOMPATIVEIS LINHA {linha + 1} COLUNA {coluna}\n")
-            flag = False
+            corretude = False
         
         oprd1 = None
         oprd2 = None
         
-        cont += 1
-        a.pop(0) 
+        contadorTemporarias += 1
+        a.pop(0)
+
+    if t == 33:
+        str2 = tabular(str2, tabulacao-1)
+        str2 += f"}}\n"
+        tabulacao = tabulacao - 1
     
-    # tratamentos finais do código
+    if t == 34:
+        str2 = tabular(str2, tabulacao)
+        str2 += f"while({expr.lexema})\n"
+        str2 = tabular(str2, tabulacao)
+        str2 += f"{{\n"
+        tabulacao = tabulacao + 1
+
+    #if t == 38:
+        #criar lista lastWhile que armazena exp_r que iniciou o(s) ultimo(s) while.
+        #quando t=38 se lastWhile[0] for true, sai pra linha depois do seu fim. Se nao, volta a analise pra linha de comeco do while em questao.
+    
     if t == 39:
-        str3 += f'}}'
-        str2 += '/*------------------------------*/\n'
-        
+        str2 += f'}}'
+        str1 += '\t/*------------------------------*/\n'
     return a
 
 def gerarArquivo():
-    if flag:
+    if corretude == True:
         arquivo = open("teste.c",'w')
-        arquivo.write(str1 + str2 + str3)
+        arquivo.write(cabecalho + str1 + str2)
     
     
 def declaraTemp(tipo):
-    global str2
-    global cont
-    
+    global str1
+    global contadorTemporarias
+    str1 = tabular(str1, 1)
     if tipo == "inteiro":
-        str2 += f"int T{cont};\n"
+        str1 += f"int T{contadorTemporarias};\n"
     if tipo == "double":
-        str2 += f"double T{cont};\n"
+        str1 += f"double T{contadorTemporarias};\n"
     if tipo == "literal":
-        str2 += f"literal T{cont};\n"
+        str1 += f"literal T{contadorTemporarias};\n"
+
+def tabular(stringAlterada, tabulacao):
+    i = 0
+    while (i < tabulacao):
+        stringAlterada = stringAlterada + f'\t'
+        i = i+1
+    return stringAlterada

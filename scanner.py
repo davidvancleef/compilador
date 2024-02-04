@@ -9,7 +9,6 @@ def retornaTabela():
 def erro(linha,coluna,palavra,estado,linhaComErro,colunaComErro):
     lexema = "".join(palavra)
     tokenErro = token('ERROR',lexema,'NULO')
-    print(f'Classe: {tokenErro.classe}, Lexema: {tokenErro.lexema}, Tipo: {tokenErro.tipo}')
     if estado == 3:
         print(f'ERRO LÉXICO: O numero "{lexema}" necessita de um digito após o ponto decimal. linha: {linha + 1}, coluna: {coluna}')
     elif estado == 5:
@@ -65,7 +64,6 @@ def scanner(arquivo,linha,coluna):
     estado = 0
     letras = list("ABCDEFGHIJKLMNOPKRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
     digitos = list("0123456789")
-    simbolos = list(",;.!?\*+-/(){}<>='\"") 
     linhaComErro = -1
     colunaComErro = -1
     caractereLido = arquivo[linha][coluna]
@@ -86,7 +84,6 @@ def scanner(arquivo,linha,coluna):
             elif caractereLido == '$' and arquivo[linha] == arquivo[-1]:
                 palavra.append('EOF')
                 return aceita(linha,coluna,10,palavra)
-                
             elif caractereLido in letras:
                 estado = 11
                 palavra.append(caractereLido)

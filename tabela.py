@@ -33,12 +33,13 @@ class tabela:
     def atualizar(self, lexema, tipo):
         for i,tk in enumerate(self.tabela):
             if tk.lexema == lexema:
-                token_aux = token(tk.classe,lexema,tipo)
-                self.tabela.pop(i)
-                self.tabela.insert(i,token_aux)
-                break
+                    token_aux = token(tk.classe,lexema,tipo)
+                    self.tabela.pop(i)
+                    self.tabela.insert(i,token_aux)
+                    break
 
     def printarTabelaAtualizada(self):
         print('\n---TABELA DE SIMBOLOS---')
         for simbolo in self.tabela:
-            print(f'Classe: {simbolo.classe}, Lexema: {simbolo.lexema}, Tipo: {simbolo.tipo}')
+            if (simbolo.classe != "inicio" and simbolo.classe != "varinicio" and simbolo.classe != "varfim" and simbolo.classe != "escreva" and simbolo.classe != "leia" and simbolo.classe != "se" and simbolo.classe != "entao" and simbolo.classe != "fimse" and simbolo.classe != "repita" and simbolo.classe != "fimrepita" and simbolo.classe != "fim" and simbolo.classe != "inteiro" and simbolo.classe != "literal" and simbolo.classe != "real"):
+                print(f'Classe: {simbolo.classe}, Lexema: {simbolo.lexema}, Tipo: {simbolo.tipo}')
