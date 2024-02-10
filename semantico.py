@@ -2,7 +2,7 @@ from tabela import tabela
 from tokenn import token
 
 cabecalho = "#include <stdio.h>\ntypedef char literal[256];\nvoid main(void)\n{"
-str1 = "\t/*-------Variaveis temporarias---------*/\n"
+str1 = "\t/*----Variaveis temporarias----*/\n"
 str2 = ""
 straux = ""
 
@@ -30,13 +30,13 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
     if corretude1 == False:
         corretude = corretude1
 
-    if t == 6: #Coloca ; e pula linha depois de receber com sucesso uma declaracao de variavel
+    if t == 6:
         
         str2 = str2 + ";\n"
     
-    if t == 7: #No reduce de declaracao de variaveis, Ex: "literal A;"
-        tk = tab.buscaLexema(a[0].lexema) #Token tk procura nome da variavel declarada
-        if tk == False: #Caso nao encontadorTemporariasre, 
+    if t == 7:
+        tk = tab.buscaLexema(a[0].lexema)
+        if tk == False:
             return a[1:]
         
         if tk.tipo == 'NULO':
@@ -163,14 +163,11 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
     
     
     if t == 20:
-        if oprd1.tipo in ['inteiro','real'] and oprd2.tipo in ['inteiro', 'real'] and oprd1.tipo != 'literal':
-            
+        if (oprd1.tipo == 'inteiro' and oprd2.tipo == 'inteiro') or (oprd1.tipo == 'real' and oprd2.tipo == 'real'):
             opm = a[1].lexema
-            # linha Tx = oprd1 opm Oprd2
             str2 = tabular(str2, tabulacao)
             str2 = str2 + f"T{contadorTemporarias} = {oprd1.lexema} {opm} {oprd2.lexema};\n"
             
-            # verifica se declara a temporária como int ou double
             if opm == '/' or oprd1.tipo == 'real':
                 declaraTemp('double')
                 ld = token(None, f'T{contadorTemporarias}', 'real')
@@ -195,7 +192,6 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
     
     
     if t == 22:
-        # verifica se é uma operação relacional, aritmetica ou outra
         if a[1].classe == 'OPR':
             temp = a[0]
             a.pop(0)
@@ -207,8 +203,7 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
         else:
             temp = a[1]
             a.pop(1)
-        
-        # pega o tk na tabela de simbolos    
+          
         tk = tab.buscaLexema(temp.lexema)
         if tk == False:
             print(f"\nERRO SEMANTICO - VARIAVEL NÃO DECLARADA LINHA {linha + 1} COLUNA {coluna}\n")
@@ -221,7 +216,6 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
             return a
         
         else:
-            # se o oprd1 estiver vazio, salva no oprd2
             if oprd1 == None:
                 oprd1 = tk
                 
@@ -263,13 +257,10 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
         str2 += f"{{\n"
         tabulacao = tabulacao + 1
     
-    if t == 27:       #Cria variavel Tx para receber o valor da operacao sendo realizada
-        # verifica se os tipos sao compativeis
-        if (oprd1.tipo == 'inteiro' or oprd1.tipo == 'real') and (oprd2.tipo == 'inteiro' or oprd2.tipo == 'real'):
-            #lexema da expr recebe Tx
+    if t == 27:
+        if (oprd1.tipo == 'inteiro' and oprd2.tipo == 'inteiro') or (oprd1.tipo == 'real' and oprd2.tipo == 'real'):
             expr.lexema = f"T{contadorTemporarias}"
             
-            #linha Tx = oprd1 opr oprd2
             str2 = tabular(str2, tabulacao)
             str2 += f"T{contadorTemporarias} = {oprd1.lexema} {a[0].lexema} {oprd2.lexema};\n"
             
@@ -300,10 +291,6 @@ def semantico(t,a:list,tab: tabela, linha, coluna, corretude1):
         str2 += f"{{\n"
         tabulacao = tabulacao + 1
 
-    #if t == 38:
-        #criar lista lastWhile que armazena exp_r que iniciou o(s) ultimo(s) while.
-        #quando t=38 se lastWhile[0] for true, sai pra linha depois do seu fim. Se nao, volta a analise pra linha de comeco do while em questao.
-    
     if t == 39:
         str2 += f'}}'
         str1 += '\t/*------------------------------*/\n'

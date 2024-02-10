@@ -11,45 +11,45 @@ def rodar(arquivoTeste):
     coluna = 0
     estado = 0
     pilha = [0]
-    pilhaAux = []  #Talvez seja a pilha semantica!
+    pilhaAux = []
     flagS = True
     tokenObtido = scanner(arquivoTeste,linha,coluna)
  
     while linha+1 < len(arquivoTeste):
-        #print ("Lexema:", tokenObtido[0].lexema, "Classe:" ,tokenObtido[0].classe, "Tipo: ",tokenObtido[0].tipo,".")
-        a = tokenObtido[0].classe # Acessa [0] porque nele está o token. Em [1] e [2] estão linha e coluna. Ele acessa especificamente a classe do token.
 
-        regra = tabelaTransicao[a].values[estado] #Usa a classe e o estado atual pra achar a regra correspondente
-        if regra[0] == 'S': #Se a classe tornar o nosso estado para um Shift
+        a = tokenObtido[0].classe
+
+        regra = tabelaTransicao[a].values[estado]
+        if regra[0] == 'S':
             
-            estado = int(regra[1:]) #Pega o estado para qual deve dar shift
-            pilha.append(estado)  #Empilha o estado na pilha
+            estado = int(regra[1:])
+            pilha.append(estado)
 
             linha = tokenObtido[1] 
             coluna = tokenObtido[2]
-            tokenObtido = scanner(arquivoTeste,linha,coluna) #escaneia proxima linha do arquivo
+            tokenObtido = scanner(arquivoTeste,linha,coluna)
 
-            if tokenObtido[0].classe in ['ID','LIT','NUM','OPM','OPR']:  #Por que salva especificamente esses?
-                pilhaAux.append(tokenObtido[0]) #Pra que serve a pilha auxiliar?
+            if tokenObtido[0].classe in ['ID','LIT','NUM','OPM','OPR']:
+                pilhaAux.append(tokenObtido[0])
 
-        elif regra[0] == 'R': #se for shift
+        elif regra[0] == 'R':
             
-            Beta = regrasGramatica['B'].values[int(regra[1:]) - 1]  #pega as derivacoes
-            Alfa = regrasGramatica['A'].values[int(regra[1:]) - 1]  #pega a regra
+            Beta = regrasGramatica['B'].values[int(regra[1:]) - 1]
+            Alfa = regrasGramatica['A'].values[int(regra[1:]) - 1]
 
-            BetaL = len(str.split(Beta,',')) #pega o numero de derivacoes da regra, desempilhando
+            BetaL = len(str.split(Beta,','))
 
             pilha = pilha[:len(pilha)-BetaL] 
 
-            estado = int(tabelaTransicao[Alfa].values[pilha[-1]]) #empilha GOTO (aparentemente)
+            estado = int(tabelaTransicao[Alfa].values[pilha[-1]])
             pilha.append(estado)
   
-            print(f'{Alfa} -> {Beta}') #Imprime a producao
-            pilhaAux = semantico.semantico(int(regra[1:]),pilhaAux,tab, linha, coluna, flagS) #invoca semantico
-        elif regra == 'ACC': #parar caso a analise termine
+            print(f'{Alfa} -> {Beta}')
+            pilhaAux = semantico.semantico(int(regra[1:]),pilhaAux,tab, linha, coluna, flagS)
+        elif regra == 'ACC':
             break
         
-        else: #Rotinas de erro.
+        else:
             flagS = False
             esp = str.split(regra[2:],sep='-')
             print("ERRO SINTÁTICO")
@@ -64,7 +64,7 @@ def rodar(arquivoTeste):
             else:
                 tokenObtido = flag
     
-    semantico.gerarArquivo() #Faz o semantico anotar tudo armazenado num arquivo
+    semantico.gerarArquivo()
 
 def panic(arquivoTeste,linha,coluna,esp):
     tokenObtido = scanner(arquivoTeste,linha,coluna)
